@@ -5,24 +5,21 @@ struct UsageMetricsView: View {
 
     var body: some View {
         VStack(spacing: 10) {
+
+            // ── 5-hour window ──────────────────────────────────────────────
             HStack(alignment: .bottom, spacing: 0) {
                 VStack(alignment: .leading, spacing: 1) {
-                    // Show percentage when a cap is configured (percentUsed > 0 or tokens exist)
-                    if usage.percentUsed > 0 || usage.inferenceTokens == 0 {
-                        Text("\(usage.percentInt)%")
-                            .font(.system(size: 44, weight: .bold, design: .rounded))
-                            .foregroundStyle(usage.state.color)
-                            .contentTransition(.numericText())
-                            .animation(.easeInOut(duration: 0.3), value: usage.percentInt)
-                    } else {
-                        Text(usage.tokenString)
-                            .font(.system(size: 44, weight: .bold, design: .rounded))
-                            .foregroundStyle(usage.state.color)
-                            .contentTransition(.numericText())
-                            .animation(.easeInOut(duration: 0.3), value: usage.inferenceTokens)
-                    }
+                    Text("\(usage.percentInt)%")
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .foregroundStyle(usage.state.color)
+                        .contentTransition(.numericText())
+                        .animation(.easeInOut(duration: 0.3), value: usage.percentInt)
 
-                    Text(subtitleText)
+                    Text(usage.tokenString + " tokens")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+
+                    Text("5-hour window")
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                 }
@@ -44,17 +41,23 @@ struct UsageMetricsView: View {
 
             UsageProgressBar(percent: usage.percentUsed, state: usage.state)
 
+            // ── Weekly window ──────────────────────────────────────────────
+            HStack {
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.system(size: 10))
+                        .foregroundStyle(.secondary)
+                    Text("This week")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Text(usage.weeklyTokenString + " tokens")
+                    .font(.system(size: 11, weight: .medium).monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+
             GuidanceTextView(state: usage.state)
         }
-    }
-
-    private var subtitleText: String {
-        var parts: [String] = []
-        if usage.inferenceTokens > 0 {
-            parts.append("\(usage.tokenString) tokens")
-        }
-        parts.append(String(format: "$%.2f", usage.costUSD))
-        parts.append("5-hour window")
-        return parts.joined(separator: " · ")
     }
 }

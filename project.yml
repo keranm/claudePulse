@@ -24,6 +24,16 @@ settings:
       DEVELOPMENT_TEAM: AUEPCDGA5G
       CODE_SIGN_IDENTITY: "Developer ID Application"
 
+schemes:
+  ClaudePulse:
+    build:
+      targets:
+        ClaudePulse: all
+    run:
+      config: Debug
+    archive:
+      config: Release
+
 targets:
   ClaudePulse:
     type: application
