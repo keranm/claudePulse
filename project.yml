@@ -17,9 +17,12 @@ settings:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
     PRODUCT_BUNDLE_IDENTIFIER: com.claudepulse.app
-    MARKETING_VERSION: "1.0-Beta"
-    CURRENT_PROJECT_VERSION: "100"
+    MARKETING_VERSION: "1.0.1"
+    CURRENT_PROJECT_VERSION: "5"
     ENABLE_HARDENED_RUNTIME: YES
+    ALWAYS_SEARCH_USER_PATHS: NO
+    CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED: YES
+    GCC_WARN_UNINITIALIZED_AUTOS: YES_AGGRESSIVE
   configs:
     Debug:
       CODE_SIGN_STYLE: Automatic
@@ -29,6 +32,8 @@ settings:
       CODE_SIGN_STYLE: Manual
       DEVELOPMENT_TEAM: AUEPCDGA5G
       CODE_SIGN_IDENTITY: "Developer ID Application"
+      PROVISIONING_PROFILE_SPECIFIER: ""
+      ARCHS: "arm64 x86_64"
 
 schemes:
   ClaudePulse:
@@ -57,10 +62,11 @@ targets:
       properties:
         LSUIElement: true
         CFBundleDisplayName: Claude Pulse
-        CFBundleShortVersionString: "1.0-Beta"
-        CFBundleVersion: "100"
+        CFBundleShortVersionString: "1.0.1"
+        CFBundleVersion: "5"
         NSHumanReadableCopyright: "Copyright © 2025 Claude Pulse"
         NSPrincipalClass: NSApplication
+        LSApplicationCategoryType: "public.app-category.developer-tools"
         SUFeedURL: "https://raw.githubusercontent.com/keranm/claudePulse/main/appcast.xml"
         SUEnableAutomaticChecks: true
         SUPublicEDKey: "0N8+0Z5XqMfyh0YH0stI9h7/7bf6qq0XmMzcQgXUzEQ="
@@ -93,9 +99,9 @@ targets:
     info:
       path: ClaudePulseWidget/Info.plist
       properties:
-        CFBundleDisplayName: ClaudePulse Widget
-        CFBundleShortVersionString: "1.0-Beta"
-        CFBundleVersion: "100"
+        CFBundleDisplayName: Claude Pulse Widget
+        CFBundleShortVersionString: "1.0.1"
+        CFBundleVersion: "5"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -117,3 +123,4 @@ targets:
           CODE_SIGN_STYLE: Manual
           DEVELOPMENT_TEAM: AUEPCDGA5G
           CODE_SIGN_IDENTITY: "Developer ID Application"
+          PROVISIONING_PROFILE_SPECIFIER: ""
