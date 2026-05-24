@@ -1,8 +1,8 @@
-# ClaudePulse
+# Claude Pulse
 
-ClaudePulse is a native macOS utility for monitoring your Claude Code usage limits in real time.
+Claude Pulse is a native macOS utility for monitoring your Claude Code usage limits in real time.
 
-Instead of checking terminals, logs, or dashboards, ClaudePulse gives you a fast visual snapshot of your remaining usage directly from your desktop.
+Instead of checking terminals, logs, or dashboards, Claude Pulse gives you a fast visual snapshot of your remaining usage directly from your desktop.
 
 Built with a focus on calm, minimal tooling for developers.
 
