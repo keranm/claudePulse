@@ -11,25 +11,58 @@
 		1225A3DEB274FFE7B767F48A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 290DBC7B400F703AE05EF851 /* SettingsView.swift */; };
 		12AF1246BE7AE83F68458C84 /* ClaudePulseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 993CD93A509BF4A20FB7722A /* ClaudePulseApp.swift */; };
 		1C61AC4734B46696BF8BF1ED /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F1EE3508476783013105C4 /* PopoverView.swift */; };
+		2A40DA58D74EB66B6FEE162D /* JSONLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FED87DFF948393C07396B41 /* JSONLParser.swift */; };
 		2ACE35A8BF0D8405ECA856F9 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55ECB423EDBC38A5F45602F8 /* SettingsStore.swift */; };
+		344241B20DCC01B121167BEE /* ClaudePulseWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21C49792E5B26EA608FAC700 /* ClaudePulseWidget.swift */; };
 		4D51DA67C4394CCFC52F78C3 /* UsageState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1108987EF18B78558A7F71F2 /* UsageState.swift */; };
+		50A4E0BBDC12FCAE19D3F303 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = FB2300A439DF554C6BA1378C /* Sparkle */; };
 		51BC032416B99DB687CEDEDC /* UsageMetricsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4B2C651D83755A939E01BBA /* UsageMetricsView.swift */; };
 		5703F61A4F72E53188A53927 /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECA800009FF6191BE0C42265 /* NotificationManager.swift */; };
 		727BEEC01FB6298D87E38302 /* UsageCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E3A00073EC5C49DAA722390 /* UsageCalculator.swift */; };
 		736BBC1422D2A1D5BC7728BD /* MenuActionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7545A763E90CBFD4CAA496 /* MenuActionsView.swift */; };
 		791B3D06EF4D2C0AA8A8AFA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6478E9CA934C3D9FEBFC486F /* Assets.xcassets */; };
 		79C2756B717B96ADE13A0DF7 /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A66D22A8F86033F68918B831 /* FileWatcher.swift */; };
+		864E618D874A7096E6C70A1B /* UsageCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E3A00073EC5C49DAA722390 /* UsageCalculator.swift */; };
+		98AA3BF4A15B792A8E00C0B9 /* ClaudePulseWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E82DEFB172F23AC6F8E24FD8 /* ClaudePulseWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9FCDAC1656AE48508EEBFCE1 /* UsageProgressBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F04FB232950992CE9EAD5A0 /* UsageProgressBar.swift */; };
+		A1193723A16D3A9EFC5B9C9A /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9E190052937794CF19AE2C31 /* WidgetKit.framework */; };
 		AA7C6E21EFDFF54F78083D25 /* MenuBarIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1B69BD9292F63825E1C1AB7 /* MenuBarIcon.swift */; };
 		C0F037F41E0AA006BDAD701F /* JSONLParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FED87DFF948393C07396B41 /* JSONLParser.swift */; };
+		C5568FE88A4F9AC65A1584DE /* UsageState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1108987EF18B78558A7F71F2 /* UsageState.swift */; };
 		DD96F3BF9F1D701143C0C582 /* GuidanceTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D23E17565004A7B5789433 /* GuidanceTextView.swift */; };
 		DDECF4F19A9CC36C05B215E8 /* UsageEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0939A36051AFE32CFCEC9B09 /* UsageEngine.swift */; };
 		FA6E1A816AC67BB34946FCDD /* PopoverHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FDF29068D242630B14FC28F /* PopoverHeaderView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		308E286EA3290DD3AD2FB8E9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 07224EDF0D9D0FA4154F5A82 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BE3DC402C093F4F6EAF8BFEA;
+			remoteInfo = ClaudePulseWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8084210CA297E17B92F4A228 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				98AA3BF4A15B792A8E00C0B9 /* ClaudePulseWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0939A36051AFE32CFCEC9B09 /* UsageEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageEngine.swift; sourceTree = "<group>"; };
 		1108987EF18B78558A7F71F2 /* UsageState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageState.swift; sourceTree = "<group>"; };
+		21C49792E5B26EA608FAC700 /* ClaudePulseWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudePulseWidget.swift; sourceTree = "<group>"; };
+		2770D99A56B3F7D269E9503D /* ClaudePulseWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ClaudePulseWidget.entitlements; sourceTree = "<group>"; };
 		290DBC7B400F703AE05EF851 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		2B7545A763E90CBFD4CAA496 /* MenuActionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuActionsView.swift; sourceTree = "<group>"; };
 		2FED87DFF948393C07396B41 /* JSONLParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONLParser.swift; sourceTree = "<group>"; };
@@ -43,19 +76,36 @@
 		8BDE377545FE88A1BA34DD66 /* ClaudePulse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClaudePulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8F04FB232950992CE9EAD5A0 /* UsageProgressBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageProgressBar.swift; sourceTree = "<group>"; };
 		993CD93A509BF4A20FB7722A /* ClaudePulseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudePulseApp.swift; sourceTree = "<group>"; };
+		9E190052937794CF19AE2C31 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		9FDF29068D242630B14FC28F /* PopoverHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverHeaderView.swift; sourceTree = "<group>"; };
+		A28F61E14DD06F6BCC0393B6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A66D22A8F86033F68918B831 /* FileWatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileWatcher.swift; sourceTree = "<group>"; };
 		B1B69BD9292F63825E1C1AB7 /* MenuBarIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarIcon.swift; sourceTree = "<group>"; };
 		C4B2C651D83755A939E01BBA /* UsageMetricsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsageMetricsView.swift; sourceTree = "<group>"; };
 		E0B3369646D38677DC0595E5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		E82DEFB172F23AC6F8E24FD8 /* ClaudePulseWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ClaudePulseWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECA800009FF6191BE0C42265 /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		83AE874812A9F33ACA70182A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1193723A16D3A9EFC5B9C9A /* WidgetKit.framework in Frameworks */,
+				50A4E0BBDC12FCAE19D3F303 /* Sparkle in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		238789B57E7BDE78F8745E20 = {
 			isa = PBXGroup;
 			children = (
 				C1CC226C8F75D7AB0A4F42F2 /* ClaudePulse */,
+				A055D59DFE3F1D2FFB7315FB /* ClaudePulseWidget */,
+				D56EFEBC9D70F89C360E9C3C /* Frameworks */,
 				A08CCE2BDB3DF95672DB069C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -101,6 +151,13 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		4D52599FA3BE82A795C4C254 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		7F7EFE06FECB6456825012A8 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -110,10 +167,22 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		A055D59DFE3F1D2FFB7315FB /* ClaudePulseWidget */ = {
+			isa = PBXGroup;
+			children = (
+				2770D99A56B3F7D269E9503D /* ClaudePulseWidget.entitlements */,
+				21C49792E5B26EA608FAC700 /* ClaudePulseWidget.swift */,
+				A28F61E14DD06F6BCC0393B6 /* Info.plist */,
+				4D52599FA3BE82A795C4C254 /* Components */,
+			);
+			path = ClaudePulseWidget;
+			sourceTree = "<group>";
+		};
 		A08CCE2BDB3DF95672DB069C /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				8BDE377545FE88A1BA34DD66 /* ClaudePulse.app */,
+				E82DEFB172F23AC6F8E24FD8 /* ClaudePulseWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -143,6 +212,14 @@
 			path = ClaudePulse;
 			sourceTree = "<group>";
 		};
+		D56EFEBC9D70F89C360E9C3C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				9E190052937794CF19AE2C31 /* WidgetKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -152,17 +229,38 @@
 			buildPhases = (
 				4E899D76178A4AEB9675A133 /* Sources */,
 				2D2EC33FE2338467B33EA831 /* Resources */,
+				83AE874812A9F33ACA70182A /* Frameworks */,
+				8084210CA297E17B92F4A228 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5E38742AF0A6A31CFE213B8B /* PBXTargetDependency */,
+			);
+			name = ClaudePulse;
+			packageProductDependencies = (
+				FB2300A439DF554C6BA1378C /* Sparkle */,
+			);
+			productName = ClaudePulse;
+			productReference = 8BDE377545FE88A1BA34DD66 /* ClaudePulse.app */;
+			productType = "com.apple.product-type.application";
+		};
+		BE3DC402C093F4F6EAF8BFEA /* ClaudePulseWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AC45C3A60569383644389832 /* Build configuration list for PBXNativeTarget "ClaudePulseWidget" */;
+			buildPhases = (
+				878588879B48E8EC27111AFB /* Sources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = ClaudePulse;
+			name = ClaudePulseWidget;
 			packageProductDependencies = (
 			);
-			productName = ClaudePulse;
-			productReference = 8BDE377545FE88A1BA34DD66 /* ClaudePulse.app */;
-			productType = "com.apple.product-type.application";
+			productName = ClaudePulseWidget;
+			productReference = E82DEFB172F23AC6F8E24FD8 /* ClaudePulseWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -176,6 +274,9 @@
 					0B5D35DE3ACB49F9E3D9F1B2 = {
 						DevelopmentTeam = AUEPCDGA5G;
 					};
+					BE3DC402C093F4F6EAF8BFEA = {
+						DevelopmentTeam = AUEPCDGA5G;
+					};
 				};
 			};
 			buildConfigurationList = 2ED7389864490ACE9F5FE3B7 /* Build configuration list for PBXProject "ClaudePulse" */;
@@ -187,12 +288,16 @@
 			);
 			mainGroup = 238789B57E7BDE78F8745E20;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9A2B3D881ACD5F37A43604C7 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A08CCE2BDB3DF95672DB069C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				0B5D35DE3ACB49F9E3D9F1B2 /* ClaudePulse */,
+				BE3DC402C093F4F6EAF8BFEA /* ClaudePulseWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -233,7 +338,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		878588879B48E8EC27111AFB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				344241B20DCC01B121167BEE /* ClaudePulseWidget.swift in Sources */,
+				2A40DA58D74EB66B6FEE162D /* JSONLParser.swift in Sources */,
+				864E618D874A7096E6C70A1B /* UsageCalculator.swift in Sources */,
+				C5568FE88A4F9AC65A1584DE /* UsageState.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5E38742AF0A6A31CFE213B8B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BE3DC402C093F4F6EAF8BFEA /* ClaudePulseWidget */;
+			targetProxy = 308E286EA3290DD3AD2FB8E9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		06FEBE27BB3F2B9BC9E8C4EC /* Release */ = {
@@ -407,6 +531,52 @@
 			};
 			name = Debug;
 		};
+		BE3C3CE10D2B29BA24CA2436 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ClaudePulseWidget/ClaudePulseWidget.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = AUEPCDGA5G;
+				INFOPLIST_FILE = ClaudePulseWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.claudepulse.app.widget;
+				PRODUCT_NAME = ClaudePulseWidget;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Debug;
+		};
+		BEC604163DC9CDA35557E44C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ClaudePulseWidget/ClaudePulseWidget.entitlements;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = AUEPCDGA5G;
+				INFOPLIST_FILE = ClaudePulseWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.claudepulse.app.widget;
+				PRODUCT_NAME = ClaudePulseWidget;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -428,7 +598,35 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		AC45C3A60569383644389832 /* Build configuration list for PBXNativeTarget "ClaudePulseWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BE3C3CE10D2B29BA24CA2436 /* Debug */,
+				BEC604163DC9CDA35557E44C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9A2B3D881ACD5F37A43604C7 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FB2300A439DF554C6BA1378C /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9A2B3D881ACD5F37A43604C7 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 07224EDF0D9D0FA4154F5A82 /* Project object */;
 }

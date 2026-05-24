@@ -57,11 +57,12 @@ final class UsageEngine {
 
     func refresh() {
         let dir = claudeDir
-        let cap = settings?.tokenCapPerWindow ?? UsageCalculator.defaultTokenCap
+        let cap = settings?.creditCap ?? UsageCalculator.defaultCreditCap
+        let weeklyCap = settings?.weeklyCreditCap ?? UsageCalculator.defaultWeeklyCreditCap
         Task.detached(priority: .utility) { [weak self] in
             guard let self else { return }
             let entries = self.loadAllEntries(from: dir)
-            let result  = self.calculator.calculate(entries: entries, tokenCap: cap)
+            let result  = self.calculator.calculate(entries: entries, creditCap: cap, weeklyCreditCap: weeklyCap)
             await MainActor.run { self.usage = result }
         }
     }
@@ -69,9 +70,9 @@ final class UsageEngine {
     private func observeSettings() {
         settingsCancellable?.cancel()
         guard let settings else { return }
-        settingsCancellable = settings.objectWillChange.sink { [weak self] _ in
-            self?.refresh()
-        }
+        settingsCancellable = settings.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.refresh() }
     }
 
     private func loadAllEntries(from dir: URL) -> [JSONLEntry] {

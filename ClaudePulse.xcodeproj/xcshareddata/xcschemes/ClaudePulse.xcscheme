@@ -21,6 +21,20 @@
                ReferencedContainer = "container:ClaudePulse.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BE3DC402C093F4F6EAF8BFEA"
+               BuildableName = "ClaudePulseWidget.appex"
+               BlueprintName = "ClaudePulseWidget"
+               ReferencedContainer = "container:ClaudePulse.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

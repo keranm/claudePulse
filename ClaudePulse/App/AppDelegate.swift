@@ -1,6 +1,8 @@
 import AppKit
 import SwiftUI
 import Combine
+import WidgetKit
+import Sparkle
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
@@ -10,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let engine              = UsageEngine()
     let notificationManager = NotificationManager()
     let settings            = SettingsStore()
+    private var updaterController: SPUStandardUpdaterController!
 
     private var updateTimer: Timer?
     private var settingsCancellable: AnyCancellable?
@@ -20,6 +23,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+
+        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 
         engine.settings = settings
         notificationManager.notificationsEnabled = settings.notificationsEnabled
@@ -88,6 +93,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         button.image           = icon
         button.imagePosition   = .imageLeft
         button.attributedTitle = NSAttributedString(string: title, attributes: attrs)
+
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     // MARK: - Popover
@@ -98,7 +105,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         popover.animates = true
         popover.setValue(true, forKeyPath: "shouldHideAnchor")
 
-        let hostingController = NSHostingController(rootView: PopoverView(engine: engine))
+        let checkForUpdates: () -> Void = { [weak self] in
+            self?.updaterController.checkForUpdates(nil)
+        }
+        let hostingController = NSHostingController(rootView: PopoverView(engine: engine, checkForUpdates: checkForUpdates))
         hostingController.view.setFrameSize(NSSize(width: 280, height: 300))
         popover.contentViewController = hostingController
         popover.contentSize = NSSize(width: 280, height: 300)

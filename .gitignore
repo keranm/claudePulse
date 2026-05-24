@@ -1,34 +1,31 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
 # Xcode
-build/
-*.xcuserstate
-*.xcworkspace/xcuserdata/
 *.xcodeproj/xcuserdata/
-*.xcodeproj/project.xcworkspace/xcuserdata/
-DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/swiftpm/
+*.pbxproj.bak
+*.xcuserstate
+*.xccheckout
 *.moved-aside
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
+DerivedData/
 
 # Swift Package Manager
 .build/
 .swiftpm/
 
-# macOS
-.DS_Store
-*.swp
-*~
+# Build output
+build/
 
-# Instruments
-*.trace
+# Sparkle — private key is in Keychain, never committed
+# (The public key in Info.plist is safe)
 
-# Carthage
-Carthage/Build/
+# Design/scratch files
+*.pxd
+*.sketch
 
-# CocoaPods
-Pods/
+# Archives
+*.xcarchive

@@ -5,28 +5,25 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section("Usage Window") {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Text("Token cap (5-hour window)")
-                        Spacer()
-                        Text(formattedCap)
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
+            Section("Claude Plan") {
+                Picker("Plan", selection: $settings.plan) {
+                    ForEach(ClaudePlan.allCases, id: \.self) { plan in
+                        Text(plan.rawValue).tag(plan)
                     }
-                    Slider(
-                        value: Binding(
-                            get: { Double(settings.tokenCapPerWindow) },
-                            set: { settings.tokenCapPerWindow = Int($0) }
-                        ),
-                        in: 100_000...2_000_000,
-                        step: 50_000
-                    )
-                    Text("Tracks inference tokens (input + output) against your 5-hour cap. Check Claude Code's /usage command to find your exact cap and calibrate this slider. Default 500K is based on observed Max plan data.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
                 }
-                .padding(.vertical, 4)
+                .pickerStyle(.segmented)
+
+                HStack {
+                    Text("5-hour session cap")
+                    Spacer()
+                    Text(formattedSessionCap)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+
+                Text("Credit limits from she-llac.com/claude-limits. Credits weight tokens by model: Sonnet input=0.4, output=2.0; Haiku input=0.133, output=0.667; Opus input=0.667, output=3.333. Cache reads are free.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Section("Notifications") {
@@ -36,15 +33,20 @@ struct SettingsView: View {
             Section("System") {
                 Toggle("Launch at login", isOn: $settings.launchAtLogin)
             }
+
+            Text("Claude Pulse reads your locally stored JSONL files to estimate usage. It will never be as accurate as /usage within Claude Code or Anthropic's web interface.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 4)
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 340)
+        .frame(width: 400, height: 360)
         .navigationTitle("Claude Pulse Settings")
     }
 
-    private var formattedCap: String {
-        let k = settings.tokenCapPerWindow
-        if k >= 1_000_000 { return String(format: "%.1fM tokens", Double(k) / 1_000_000) }
-        return "\(k / 1_000)K tokens"
+    private var formattedSessionCap: String {
+        let cap = settings.creditCap
+        if cap >= 1_000_000 { return String(format: "%.1fM credits", cap / 1_000_000) }
+        return "\(Int(cap) / 1_000)K credits"
     }
 }

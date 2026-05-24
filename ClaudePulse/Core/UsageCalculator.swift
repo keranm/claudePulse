@@ -1,19 +1,18 @@
 import Foundation
 
 struct WindowUsage {
-    // Inference tokens = input + output (what Anthropic rate-limits on).
-    // Cache tokens excluded — empirically not counted toward the 5h window cap.
-    let inferenceTokens: Int
-    let cacheTokens: Int
+    let creditsUsed: Double      // Anthropic's credit units (weighted by model)
+    let inferenceTokens: Int     // raw input+output tokens (informational)
+    let cacheTokens: Int         // cache_read + cache_write (free on subscription)
     let costUSD: Double
-    let percentUsed: Double        // inferenceTokens / tokenCap, or 0 if tokenCap == 0
+    let percentUsed: Double      // creditsUsed / creditCap
     let windowStart: Date
     let windowEnd: Date
     let secondsUntilReset: TimeInterval
     let isActive: Bool
-
-    // Weekly rollup (last 7 days)
-    let weeklyTokens: Int
+    let weeklyCredits: Double
+    let weeklyPercentUsed: Double
+    let weeklyWindowEnd: Date
 
     var state: UsageState {
         UsageState.from(percent: percentUsed, isActive: isActive)
@@ -28,10 +27,21 @@ struct WindowUsage {
         return "<1m"
     }
 
+    var weeklyResetCountdown: String {
+        let secs    = Int(max(0, weeklyWindowEnd.timeIntervalSinceNow))
+        let days    = secs / 86400
+        let hours   = (secs % 86400) / 3600
+        let minutes = (secs % 3600) / 60
+        if days > 0  { return "resets in \(days)d \(hours)h" }
+        if hours > 0 { return "resets in \(hours)h \(minutes)m" }
+        return "resets soon"
+    }
+
     var percentInt: Int { Int(percentUsed * 100) }
 
-    var tokenString: String { Self.formatK(inferenceTokens) }
-    var weeklyTokenString: String { Self.formatK(weeklyTokens) }
+    var creditString: String    { Self.formatK(Int(creditsUsed)) }
+    var weeklyTokenString: String { Self.formatK(Int(weeklyCredits)) }
+    var tokenString: String     { Self.formatK(inferenceTokens) }
 
     static func formatK(_ n: Int) -> String {
         if n >= 1_000_000 { return String(format: "%.1fM", Double(n) / 1_000_000) }
@@ -40,55 +50,124 @@ struct WindowUsage {
     }
 
     static var empty: WindowUsage {
-        WindowUsage(inferenceTokens: 0, cacheTokens: 0, costUSD: 0, percentUsed: 0,
-                    windowStart: Date(), windowEnd: Date().addingTimeInterval(5 * 3600),
-                    secondsUntilReset: 5 * 3600, isActive: false,
-                    weeklyTokens: 0)
+        let now = Date()
+        return WindowUsage(
+            creditsUsed: 0, inferenceTokens: 0, cacheTokens: 0, costUSD: 0,
+            percentUsed: 0, windowStart: now,
+            windowEnd: now.addingTimeInterval(5 * 3600),
+            secondsUntilReset: 5 * 3600, isActive: false,
+            weeklyCredits: 0, weeklyPercentUsed: 0,
+            weeklyWindowEnd: now.addingTimeInterval(7 * 24 * 3600)
+        )
+    }
+}
+
+// MARK: - Credit rates per model (from she-llac.com/claude-limits)
+// credits = ceil(input_tokens × input_rate + output_tokens × output_rate)
+// Cache reads = 0 credits (free on subscription plans)
+
+private struct CreditRates {
+    let input: Double
+    let output: Double
+
+    static let haiku  = CreditRates(input: 0.133, output: 0.667)
+    static let sonnet = CreditRates(input: 0.4,   output: 2.0)
+    static let opus   = CreditRates(input: 0.667, output: 3.333)
+    static let defaultRates = CreditRates(input: 0.4, output: 2.0)
+
+    static func forModel(_ model: String?) -> CreditRates {
+        guard let model else { return defaultRates }
+        if model.contains("haiku") { return haiku }
+        if model.contains("opus")  { return opus }
+        return sonnet
     }
 }
 
 final class UsageCalculator {
-    static let windowDuration: TimeInterval = 5 * 3600   // 5 hours
+    static let windowDuration: TimeInterval = 5 * 3600
     static let weekDuration: TimeInterval   = 7 * 24 * 3600
-    // Empirically derived: 207K output tokens = 41% of cap → cap ≈ 500K.
-    // Cache reads are NOT counted — Anthropic excludes them from rate limits.
-    static let defaultTokenCap: Int         = 500_000
-    static let activityCutoff: TimeInterval = 300        // "active" if request in last 5 min
+    static let activityCutoff: TimeInterval = 300
 
-    func calculate(entries: [JSONLEntry], tokenCap: Int, now: Date = Date()) -> WindowUsage {
-        // Collect all assistant entries with valid timestamps, sorted oldest→newest
+    // Session credit caps by plan (from she-llac.com/claude-limits)
+    static let creditCapPro:   Double = 550_000
+    static let creditCapMax5:  Double = 3_300_000
+    static let creditCapMax20: Double = 11_000_000
+    static let defaultCreditCap: Double = creditCapPro
+
+    // Weekly credit caps by plan
+    static let weeklyCreditCapPro:   Double = 5_000_000
+    static let weeklyCreditCapMax5:  Double = 41_666_700
+    static let weeklyCreditCapMax20: Double = 83_333_300
+    static let defaultWeeklyCreditCap: Double = weeklyCreditCapPro
+
+    func calculate(entries: [JSONLEntry], creditCap: Double, weeklyCreditCap: Double, now: Date = Date()) -> WindowUsage {
+        // Deduplicate by requestId — Claude Code writes the same API response multiple
+        // times (streaming reconnects). Keep earliest entry per requestId.
+        var seenRequestIds = Set<String>()
         let all = entries
             .compactMap { e -> (Date, JSONLEntry)? in
                 guard e.message?.role == "assistant",
                       e.message?.usage != nil,
                       let ts = e.timestamp else { return nil }
+                if let rid = e.requestId {
+                    guard seenRequestIds.insert(rid).inserted else { return nil }
+                }
                 return (ts, e)
             }
             .sorted { $0.0 < $1.0 }
 
         guard !all.isEmpty else { return .empty }
 
-        // ── Detect the actual Anthropic window start ──────────────────────────
-        // Anthropic's window: starts at the first request, lasts exactly 5h.
-        // A new window starts when the previous window's 5h have elapsed.
+        // ── Detect session window start ───────────────────────────────────────
         var windowStart = all[0].0
         for (ts, _) in all.dropFirst() {
             if ts > windowStart.addingTimeInterval(Self.windowDuration) {
-                windowStart = ts      // previous window expired; this request starts a new one
+                windowStart = ts
             }
         }
         let windowEnd = windowStart.addingTimeInterval(Self.windowDuration)
 
-        // If the window has fully expired with no new request, return empty
+        // ── Detect weekly window start ────────────────────────────────────────
+        // Limit lookback to ~10 days so the rolling algorithm can find one full
+        // 7-day boundary without walking back months of old JSONL data.
+        let tenDaysAgo = now.addingTimeInterval(-10 * 24 * 3600)
+        let weeklyBase = all.filter { $0.0 >= tenDaysAgo }
+        let weeklyRoot = weeklyBase.isEmpty ? all : weeklyBase
+        var weeklyWindowStart = weeklyRoot[0].0
+        for (ts, _) in weeklyRoot.dropFirst() {
+            if ts > weeklyWindowStart.addingTimeInterval(Self.weekDuration) {
+                weeklyWindowStart = ts
+            }
+        }
+        let weeklyWindowEnd = weeklyWindowStart.addingTimeInterval(Self.weekDuration)
+
+        // ── Accumulate weekly credits ─────────────────────────────────────────
+        var weeklyCreditsTotal = 0.0
+        for (ts, entry) in all {
+            guard ts >= weeklyWindowStart && ts <= now,
+                  let usage = entry.message?.usage else { continue }
+            let rates = CreditRates.forModel(entry.message?.model)
+            let inp = usage.inputTokens ?? 0
+            let out = usage.outputTokens ?? 0
+            weeklyCreditsTotal += ceil(Double(inp) * rates.input + Double(out) * rates.output)
+        }
+        let weeklyPercent = weeklyCreditCap > 0 ? min(weeklyCreditsTotal / weeklyCreditCap, 1.0) : 0
+
         if windowEnd <= now {
-            return WindowUsage(inferenceTokens: 0, cacheTokens: 0, costUSD: 0, percentUsed: 0,
-                               windowStart: now, windowEnd: now.addingTimeInterval(Self.windowDuration),
-                               secondsUntilReset: Self.windowDuration, isActive: false,
-                               weeklyTokens: weeklyTokens(from: all, now: now))
+            return WindowUsage(
+                creditsUsed: 0, inferenceTokens: 0, cacheTokens: 0, costUSD: 0,
+                percentUsed: 0, windowStart: now,
+                windowEnd: now.addingTimeInterval(Self.windowDuration),
+                secondsUntilReset: Self.windowDuration, isActive: false,
+                weeklyCredits: weeklyCreditsTotal,
+                weeklyPercentUsed: weeklyPercent,
+                weeklyWindowEnd: weeklyWindowEnd
+            )
         }
 
-        // ── Count tokens in the current window ────────────────────────────────
+        // ── Accumulate session credits ────────────────────────────────────────
         let recentCutoff = now.addingTimeInterval(-Self.activityCutoff)
+        var creditsUsed     = 0.0
         var inferenceTokens = 0
         var cacheTokens     = 0
         var totalCost       = 0.0
@@ -97,15 +176,21 @@ final class UsageCalculator {
         for (ts, entry) in all {
             guard ts >= windowStart && ts <= now,
                   let usage = entry.message?.usage else { continue }
-            inferenceTokens += (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)
+
+            let rates = CreditRates.forModel(entry.message?.model)
+            let inp = usage.inputTokens ?? 0
+            let out = usage.outputTokens ?? 0
+            creditsUsed     += ceil(Double(inp) * rates.input + Double(out) * rates.output)
+            inferenceTokens += inp + out
             cacheTokens     += (usage.cacheReadInputTokens ?? 0) + (usage.cacheCreationInputTokens ?? 0)
             totalCost       += usage.cost(for: entry.message?.model)
             if !isActive && ts >= recentCutoff { isActive = true }
         }
 
-        let percent = tokenCap > 0 ? min(Double(inferenceTokens) / Double(tokenCap), 1.0) : 0
+        let percent = creditCap > 0 ? min(creditsUsed / creditCap, 1.0) : 0
 
         return WindowUsage(
+            creditsUsed: creditsUsed,
             inferenceTokens: inferenceTokens,
             cacheTokens: cacheTokens,
             costUSD: totalCost,
@@ -114,17 +199,9 @@ final class UsageCalculator {
             windowEnd: windowEnd,
             secondsUntilReset: max(0, windowEnd.timeIntervalSince(now)),
             isActive: isActive,
-            weeklyTokens: weeklyTokens(from: all, now: now)
+            weeklyCredits: weeklyCreditsTotal,
+            weeklyPercentUsed: weeklyPercent,
+            weeklyWindowEnd: weeklyWindowEnd
         )
-    }
-
-    private func weeklyTokens(from all: [(Date, JSONLEntry)], now: Date) -> Int {
-        let weekStart = now.addingTimeInterval(-Self.weekDuration)
-        return all.reduce(0) { sum, pair in
-            let (ts, entry) = pair
-            guard ts >= weekStart && ts <= now,
-                  let usage = entry.message?.usage else { return sum }
-            return sum + (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0)
-        }
     }
 }

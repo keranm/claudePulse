@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PopoverView: View {
     var engine: UsageEngine
+    var checkForUpdates: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -15,7 +16,7 @@ struct PopoverView: View {
 
             Divider().opacity(0.25)
 
-            MenuActionsView()
+            MenuActionsView(checkForUpdates: checkForUpdates)
         }
         .frame(width: 280)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))

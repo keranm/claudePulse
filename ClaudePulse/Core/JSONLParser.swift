@@ -4,9 +4,10 @@ struct JSONLEntry: Decodable {
     let type: String?
     let timestamp: Date?
     let message: MessagePayload?
+    let requestId: String?
 
     enum CodingKeys: String, CodingKey {
-        case type, timestamp, message
+        case type, timestamp, message, requestId
     }
 }
 

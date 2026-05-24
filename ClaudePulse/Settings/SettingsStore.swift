@@ -1,6 +1,28 @@
 import Foundation
 import ServiceManagement
 
+enum ClaudePlan: String, CaseIterable {
+    case pro   = "Pro"
+    case max5  = "Max 5×"
+    case max20 = "Max 20×"
+
+    var creditCap: Double {
+        switch self {
+        case .pro:   return UsageCalculator.creditCapPro
+        case .max5:  return UsageCalculator.creditCapMax5
+        case .max20: return UsageCalculator.creditCapMax20
+        }
+    }
+
+    var weeklyCreditCap: Double {
+        switch self {
+        case .pro:   return UsageCalculator.weeklyCreditCapPro
+        case .max5:  return UsageCalculator.weeklyCreditCapMax5
+        case .max20: return UsageCalculator.weeklyCreditCapMax20
+        }
+    }
+}
+
 final class SettingsStore: ObservableObject {
     @Published var launchAtLogin: Bool {
         didSet { applyLaunchAtLogin() }
@@ -10,18 +32,18 @@ final class SettingsStore: ObservableObject {
         didSet { UserDefaults.standard.set(notificationsEnabled, forKey: "notificationsEnabled") }
     }
 
-    // Token cap per 5-hour window (inference tokens only: input + output, not cache reads).
-    // Default 500K derived from observation: 207K output tokens = 41% → cap ≈ 500K.
-    // Users on different plans should calibrate this from Claude Code's /usage command.
-    @Published var tokenCapPerWindow: Int {
-        didSet { UserDefaults.standard.set(tokenCapPerWindow, forKey: "tokenCapPerWindow") }
+    @Published var plan: ClaudePlan {
+        didSet { UserDefaults.standard.set(plan.rawValue, forKey: "claudePlan") }
     }
+
+    var creditCap: Double { plan.creditCap }
+    var weeklyCreditCap: Double { plan.weeklyCreditCap }
 
     init() {
         self.launchAtLogin = SMAppService.mainApp.status == .enabled
         self.notificationsEnabled = UserDefaults.standard.object(forKey: "notificationsEnabled") as? Bool ?? true
-        let saved = UserDefaults.standard.integer(forKey: "tokenCapPerWindow")
-        self.tokenCapPerWindow = saved > 0 ? saved : UsageCalculator.defaultTokenCap
+        let savedPlan = UserDefaults.standard.string(forKey: "claudePlan") ?? ""
+        self.plan = ClaudePlan(rawValue: savedPlan) ?? .pro
         registerOnFirstLaunch()
     }
 

@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct MenuActionsView: View {
+    @Environment(\.openSettings) private var openSettings
+    var checkForUpdates: () -> Void
+
     var body: some View {
         VStack(spacing: 1) {
             MenuActionRow(icon: "arrow.up.right.square", label: "Claude Usage", shortcut: "⌘O") {
@@ -9,8 +12,11 @@ struct MenuActionsView: View {
                 }
             }
             MenuActionRow(icon: "gearshape", label: "Settings", shortcut: "⌘,") {
-                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                openSettings()
                 NSApp.activate(ignoringOtherApps: true)
+            }
+            MenuActionRow(icon: "arrow.triangle.2.circlepath", label: "Check for Updates", shortcut: "") {
+                checkForUpdates()
             }
 
             Divider()
