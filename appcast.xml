@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Claude Pulse</title>
+    <link>https://raw.githubusercontent.com/keranm/claudePulse/main/appcast.xml</link>
+    <description>Claude Pulse update feed</description>
+    <language>en</language>
+
+    <item>
+      <title>Claude Pulse 1.0 Beta</title>
+      <pubDate>Sat, 24 May 2026 12:00:00 +0000</pubDate>
+      <sparkle:version>100</sparkle:version>
+      <sparkle:shortVersionString>1.0-Beta</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/keranm/claudePulse/releases/download/v1.0-Beta/ClaudePulse-1.0-Beta.zip"
+        sparkle:edSignature="cmSnwBx7krh0WfG5UNg3TBCrCVYYzZwZqcMWr7fAVdTHeZXOR0QIjkd6LoFuUePIXMKeVucZUUrxkje/3GpeDQ=="
+        length="3175407"
+        type="application/octet-stream"/>
+    </item>
+
+  </channel>
+</rss>
