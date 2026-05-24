@@ -61,7 +61,7 @@ targets:
         CFBundleVersion: "100"
         NSHumanReadableCopyright: "Copyright © 2025 Claude Pulse"
         NSPrincipalClass: NSApplication
-        SUFeedURL: "https://raw.githubusercontent.com/YOUR_USERNAME/claudepulse/main/appcast.xml"
+        SUFeedURL: "https://raw.githubusercontent.com/keranm/claudePulse/main/appcast.xml"
         SUEnableAutomaticChecks: true
         SUPublicEDKey: "0N8+0Z5XqMfyh0YH0stI9h7/7bf6qq0XmMzcQgXUzEQ="
     entitlements:
