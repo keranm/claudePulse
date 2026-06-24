@@ -22,7 +22,7 @@
     <item>
       <title>Claude Pulse 1.0 Beta</title>
       <pubDate>Sat, 24 May 2026 12:00:00 +0000</pubDate>
-      <sparkle:version>100</sparkle:version>
+      <sparkle:version>1</sparkle:version>
       <sparkle:shortVersionString>1.0-Beta</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <enclosure
