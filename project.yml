@@ -62,8 +62,8 @@ targets:
       properties:
         LSUIElement: true
         CFBundleDisplayName: Claude Pulse
-        CFBundleShortVersionString: "1.0.2"
-        CFBundleVersion: "6"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSHumanReadableCopyright: "Copyright © 2025 Claude Pulse"
         NSPrincipalClass: NSApplication
         LSApplicationCategoryType: "public.app-category.developer-tools"
@@ -100,8 +100,8 @@ targets:
       path: ClaudePulseWidget/Info.plist
       properties:
         CFBundleDisplayName: Claude Pulse Widget
-        CFBundleShortVersionString: "1.0.2"
-        CFBundleVersion: "6"
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
