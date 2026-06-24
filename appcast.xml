@@ -7,6 +7,19 @@
     <language>en</language>
 
     <item>
+      <title>Claude Pulse 1.0.2</title>
+      <pubDate>Tue, 24 Jun 2026 03:25:00 +0000</pubDate>
+      <sparkle:version>6</sparkle:version>
+      <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <enclosure
+        url="https://github.com/keranm/claudePulse/releases/download/v1.0.2/ClaudePulse-1.0.2.zip"
+        sparkle:edSignature="fZ10ZKJ3dYf1etTmMlzO9zNRRSLFy6Nzew623b+zDfZTLoEwKpdSBLg/adCBEZZFDMLdPuTegAIXExq06+bYBQ=="
+        length="2817647"
+        type="application/octet-stream"/>
+    </item>
+
+    <item>
       <title>Claude Pulse 1.0.1</title>
       <pubDate>Sun, 24 May 2026 15:00:00 +0000</pubDate>
       <sparkle:version>5</sparkle:version>

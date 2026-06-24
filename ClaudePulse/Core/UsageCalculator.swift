@@ -1,5 +1,21 @@
 import Foundation
 
+// MARK: - API data models (shared with widget via UsageCalculator.swift)
+
+// One rate-limit window as returned by the claude.ai usage endpoint.
+// `usedPercentage` is 0–100; `resetsAt` is the absolute reset date.
+struct RateLimitWindow {
+    let usedPercentage: Double
+    let resetsAt: Date
+}
+
+struct APIUsageData {
+    let fiveHour: RateLimitWindow?
+    let sevenDay:  RateLimitWindow?
+}
+
+// MARK: -
+
 struct WindowUsage {
     let creditsUsed: Double      // Anthropic's credit units (weighted by model)
     let inferenceTokens: Int     // raw input+output tokens (informational)
@@ -60,6 +76,50 @@ struct WindowUsage {
             weeklyWindowEnd: now.addingTimeInterval(7 * 24 * 3600)
         )
     }
+
+    // Overlay authoritative percentages and reset times from the claude.ai API
+    // while keeping the JSONL-derived cost/token breakdown unchanged.
+    func applyingAPIUsage(_ api: APIUsageData) -> WindowUsage {
+        let sessionPercent: Double
+        let newWindowEnd: Date
+        let newSecondsUntilReset: TimeInterval
+
+        if let fh = api.fiveHour {
+            sessionPercent         = min(fh.usedPercentage / 100.0, 1.0)
+            newWindowEnd           = fh.resetsAt
+            newSecondsUntilReset   = max(0, fh.resetsAt.timeIntervalSinceNow)
+        } else {
+            sessionPercent       = percentUsed
+            newWindowEnd         = windowEnd
+            newSecondsUntilReset = secondsUntilReset
+        }
+
+        let weeklyPercent: Double
+        let newWeeklyWindowEnd: Date
+
+        if let sd = api.sevenDay {
+            weeklyPercent       = min(sd.usedPercentage / 100.0, 1.0)
+            newWeeklyWindowEnd  = sd.resetsAt
+        } else {
+            weeklyPercent      = weeklyPercentUsed
+            newWeeklyWindowEnd = weeklyWindowEnd
+        }
+
+        return WindowUsage(
+            creditsUsed: creditsUsed,
+            inferenceTokens: inferenceTokens,
+            cacheTokens: cacheTokens,
+            costUSD: costUSD,
+            percentUsed: sessionPercent,
+            windowStart: windowStart,
+            windowEnd: newWindowEnd,
+            secondsUntilReset: newSecondsUntilReset,
+            isActive: isActive,
+            weeklyCredits: weeklyCredits,
+            weeklyPercentUsed: weeklyPercent,
+            weeklyWindowEnd: newWeeklyWindowEnd
+        )
+    }
 }
 
 // MARK: - Credit rates per model (from she-llac.com/claude-limits)
@@ -73,12 +133,16 @@ private struct CreditRates {
     static let haiku  = CreditRates(input: 0.133, output: 0.667)
     static let sonnet = CreditRates(input: 0.4,   output: 2.0)
     static let opus   = CreditRates(input: 0.667, output: 3.333)
+    // Fable 5 / Mythos 5 credit rates are not yet confirmed by she-llac.com;
+    // using opus rate as a conservative lower bound (actual rate may be higher).
+    static let fable  = CreditRates(input: 0.667, output: 3.333)
     static let defaultRates = CreditRates(input: 0.4, output: 2.0)
 
     static func forModel(_ model: String?) -> CreditRates {
         guard let model else { return defaultRates }
-        if model.contains("haiku") { return haiku }
-        if model.contains("opus")  { return opus }
+        if model.contains("haiku")  { return haiku }
+        if model.contains("fable") || model.contains("mythos") { return fable }
+        if model.contains("opus")   { return opus }
         return sonnet
     }
 }

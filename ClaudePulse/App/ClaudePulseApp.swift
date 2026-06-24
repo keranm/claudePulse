@@ -6,7 +6,7 @@ struct ClaudePulseApp: App {
 
     var body: some Scene {
         Settings {
-            SettingsView(settings: appDelegate.settings)
+            SettingsView(settings: appDelegate.settings, detectedPlan: appDelegate.engine.detectedPlan)
         }
     }
 }

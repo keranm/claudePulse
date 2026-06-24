@@ -2,28 +2,50 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var settings: SettingsStore
+    var detectedPlan: ClaudePlan?
 
     var body: some View {
         Form {
             Section("Claude Plan") {
-                Picker("Plan", selection: $settings.plan) {
-                    ForEach(ClaudePlan.allCases, id: \.self) { plan in
-                        Text(plan.rawValue).tag(plan)
+                if let plan = detectedPlan {
+                    HStack {
+                        Text("Plan")
+                        Spacer()
+                        Text(plan.rawValue)
+                            .foregroundStyle(.secondary)
+                    }
+                    HStack {
+                        Text("5-hour session cap")
+                        Spacer()
+                        Text(formattedCap(plan.creditCap))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    HStack {
+                        Text("Weekly cap")
+                        Spacer()
+                        Text(formattedCap(plan.weeklyCreditCap))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                } else {
+                    HStack {
+                        Image(systemName: "exclamationmark.circle")
+                            .foregroundStyle(.secondary)
+                        Text("Plan not detected — open Claude Code to authenticate")
+                            .foregroundStyle(.secondary)
+                            .font(.callout)
                     }
                 }
-                .pickerStyle(.segmented)
 
-                HStack {
-                    Text("5-hour session cap")
-                    Spacer()
-                    Text(formattedSessionCap)
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
+                Link(destination: URL(string: "https://claude.ai/upgrade")!) {
+                    HStack(spacing: 4) {
+                        Text("Manage your plan on Claude.ai")
+                        Image(systemName: "arrow.up.right")
+                            .font(.caption)
+                    }
                 }
-
-                Text("Credit limits from she-llac.com/claude-limits. Credits weight tokens by model: Sonnet input=0.4, output=2.0; Haiku input=0.133, output=0.667; Opus input=0.667, output=3.333. Cache reads are free.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                .foregroundStyle(.blue)
             }
 
             Section("Notifications") {
@@ -33,19 +55,13 @@ struct SettingsView: View {
             Section("System") {
                 Toggle("Launch at login", isOn: $settings.launchAtLogin)
             }
-
-            Text("Claude Pulse reads your locally stored JSONL files to estimate usage. It will never be as accurate as /usage within Claude Code or Anthropic's web interface.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 4)
         }
         .formStyle(.grouped)
-        .frame(width: 400, height: 360)
+        .frame(width: 400, height: 320)
         .navigationTitle("Claude Pulse Settings")
     }
 
-    private var formattedSessionCap: String {
-        let cap = settings.creditCap
+    private func formattedCap(_ cap: Double) -> String {
         if cap >= 1_000_000 { return String(format: "%.1fM credits", cap / 1_000_000) }
         return "\(Int(cap) / 1_000)K credits"
     }

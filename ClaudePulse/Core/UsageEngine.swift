@@ -5,9 +5,11 @@ import Combine
 @Observable
 final class UsageEngine {
     private(set) var usage: WindowUsage = .empty
+    private(set) var detectedPlan: ClaudePlan?
 
     private let parser     = JSONLParser()
     private let calculator = UsageCalculator()
+    private let apiClient  = UsageAPIClient()
     private let watcher    = FileWatcher()
     private var countdownTimer: Timer?
     private var settingsCancellable: AnyCancellable?
@@ -57,13 +59,30 @@ final class UsageEngine {
 
     func refresh() {
         let dir = claudeDir
-        let cap = settings?.creditCap ?? UsageCalculator.defaultCreditCap
-        let weeklyCap = settings?.weeklyCreditCap ?? UsageCalculator.defaultWeeklyCreditCap
         Task.detached(priority: .utility) { [weak self] in
             guard let self else { return }
+
+            // API provides the authoritative percentage — covers all devices and surfaces.
+            // Fetch first so detectedPlan is set before we pick the credit caps.
+            let apiData = try? await self.apiClient.fetchUsage()
+
+            // Use plan detected from Keychain; fall back to Pro caps if unavailable.
+            let plan      = self.apiClient.detectedPlan
+            let cap       = plan?.creditCap       ?? UsageCalculator.defaultCreditCap
+            let weeklyCap = plan?.weeklyCreditCap ?? UsageCalculator.defaultWeeklyCreditCap
+
+            // JSONL provides cost, token counts, and activity detection
             let entries = self.loadAllEntries(from: dir)
-            let result  = self.calculator.calculate(entries: entries, creditCap: cap, weeklyCreditCap: weeklyCap)
-            await MainActor.run { self.usage = result }
+            var result  = self.calculator.calculate(entries: entries, creditCap: cap, weeklyCreditCap: weeklyCap)
+
+            if let apiData {
+                result = result.applyingAPIUsage(apiData)
+            }
+
+            await MainActor.run {
+                self.detectedPlan = plan
+                self.usage = result
+            }
         }
     }
 

@@ -32,18 +32,9 @@ final class SettingsStore: ObservableObject {
         didSet { UserDefaults.standard.set(notificationsEnabled, forKey: "notificationsEnabled") }
     }
 
-    @Published var plan: ClaudePlan {
-        didSet { UserDefaults.standard.set(plan.rawValue, forKey: "claudePlan") }
-    }
-
-    var creditCap: Double { plan.creditCap }
-    var weeklyCreditCap: Double { plan.weeklyCreditCap }
-
     init() {
         self.launchAtLogin = SMAppService.mainApp.status == .enabled
         self.notificationsEnabled = UserDefaults.standard.object(forKey: "notificationsEnabled") as? Bool ?? true
-        let savedPlan = UserDefaults.standard.string(forKey: "claudePlan") ?? ""
-        self.plan = ClaudePlan(rawValue: savedPlan) ?? .pro
         registerOnFirstLaunch()
     }
 
