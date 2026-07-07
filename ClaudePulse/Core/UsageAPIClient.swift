@@ -21,6 +21,7 @@ final class UsageAPIClient {
 
     private var lastFetchDate: Date = .distantPast
     private var cachedResult: APIUsageData?
+    private var keychainDeniedUntil: Date = .distantPast
 
     /// Plan detected from Keychain credentials; nil if unavailable or unrecognised.
     private(set) var detectedPlan: ClaudePlan?
@@ -29,6 +30,7 @@ final class UsageAPIClient {
     // Returns nil (without throwing) when credentials aren't present.
     func fetchUsage() async throws -> APIUsageData? {
         let now = Date()
+        guard now >= keychainDeniedUntil else { return nil }
         if let cached = cachedResult, now.timeIntervalSince(lastFetchDate) < Self.minRefreshInterval {
             return cached
         }
@@ -74,6 +76,10 @@ final class UsageAPIClient {
         switch status {
         case errSecItemNotFound: return nil
         case errSecSuccess:      break
+        case errSecUserCanceled, errSecInteractionNotAllowed:
+            keychainDeniedUntil = Date().addingTimeInterval(300)
+            log.info("Keychain access denied — backing off 5 minutes")
+            return nil
         default:                 throw UsageAPIError.keychainError(status)
         }
 
