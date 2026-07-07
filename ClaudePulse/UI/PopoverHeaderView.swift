@@ -27,6 +27,7 @@ struct PopoverHeaderView: View {
             }
         }
         .padding(.horizontal, 14)
-        .padding(.vertical, 11)
+        .padding(.top, 11)
+        .padding(.bottom, 6)
     }
 }

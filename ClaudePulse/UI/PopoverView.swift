@@ -12,7 +12,8 @@ struct PopoverView: View {
 
             UsageMetricsView(usage: engine.usage)
                 .padding(.horizontal, 14)
-                .padding(.vertical, 13)
+                .padding(.top, 4)
+                .padding(.bottom, 13)
 
             Divider().opacity(0.25)
 

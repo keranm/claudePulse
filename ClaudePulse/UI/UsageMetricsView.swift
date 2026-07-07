@@ -7,6 +7,53 @@ struct UsageMetricsView: View {
         UsageState.from(percent: usage.weeklyPercentUsed, isActive: usage.weeklyPercentUsed > 0)
     }
 
+    private var hasBreakdown: Bool {
+        usage.percentUsed - usage.cliPercentUsed > 0.005
+    }
+
+    private var cliState: UsageState {
+        UsageState.from(percent: usage.cliPercentUsed, isActive: usage.isActive)
+    }
+
+    @ViewBuilder
+    private func sourceRow(label: String, detail: String, percent: Double, state: UsageState, indent: Bool, cost: Double? = nil) -> some View {
+        HStack(spacing: 0) {
+            if indent { Spacer().frame(width: 12) }
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 4) {
+                    Text(label)
+                        .font(.system(size: 11, weight: indent ? .regular : .medium))
+                        .foregroundStyle(.secondary)
+                    if !detail.isEmpty {
+                        Text("· \(detail)")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.tertiary)
+                    }
+                    if let cost {
+                        Text("· \(cost < 0.01 ? "<$0.01" : String(format: "$%.2f", cost)) credit")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.tertiary)
+                    }
+                    Spacer()
+                    Text("\(Int(percent * 100))%")
+                        .font(.system(size: 11, weight: .medium).monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+                Capsule()
+                    .fill(.secondary.opacity(0.12))
+                    .frame(height: 5)
+                    .overlay(alignment: .leading) {
+                        GeometryReader { geo in
+                            Capsule()
+                                .fill(state.gradient)
+                                .frame(width: geo.size.width * CGFloat(min(percent, 1.0)))
+                                .animation(.easeInOut(duration: 0.5), value: percent)
+                        }
+                    }
+            }
+        }
+    }
+
     var body: some View {
         VStack(spacing: 10) {
 
@@ -26,6 +73,7 @@ struct UsageMetricsView: View {
                     Text("5-hour window")
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
+                        .padding(.top, 4)
                 }
 
                 Spacer()
@@ -44,6 +92,16 @@ struct UsageMetricsView: View {
             }
 
             UsageProgressBar(percent: usage.percentUsed, state: usage.state)
+
+            // ── Source breakdown (shown when API total > JSONL CLI usage) ──
+            if hasBreakdown {
+                VStack(spacing: 8) {
+                    sourceRow(label: "Total", detail: "all surfaces", percent: usage.percentUsed, state: usage.state, indent: false)
+                    sourceRow(label: "Claude Code", detail: "", percent: usage.cliPercentUsed, state: cliState, indent: true, cost: usage.costUSD)
+                    sourceRow(label: "Other devices & web", detail: "~estimated", percent: max(0, usage.percentUsed - usage.cliPercentUsed), state: usage.state, indent: true)
+                }
+                .padding(.top, 4)
+            }
 
             // ── Weekly window ──────────────────────────────────────────────
             VStack(spacing: 4) {
