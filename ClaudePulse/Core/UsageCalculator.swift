@@ -23,6 +23,7 @@ struct WindowUsage {
     let costUSD: Double
     let percentUsed: Double      // creditsUsed / creditCap (API-authoritative when available)
     let cliPercentUsed: Double   // JSONL-derived Claude Code % only (pre-API overlay)
+    let hasAPIData: Bool         // true when API overlay was successfully applied
     let windowStart: Date
     let windowEnd: Date
     let secondsUntilReset: TimeInterval
@@ -70,7 +71,7 @@ struct WindowUsage {
         let now = Date()
         return WindowUsage(
             creditsUsed: 0, inferenceTokens: 0, cacheTokens: 0, costUSD: 0,
-            percentUsed: 0, cliPercentUsed: 0, windowStart: now,
+            percentUsed: 0, cliPercentUsed: 0, hasAPIData: false, windowStart: now,
             windowEnd: now.addingTimeInterval(5 * 3600),
             secondsUntilReset: 5 * 3600, isActive: false,
             weeklyCredits: 0, weeklyPercentUsed: 0,
@@ -113,6 +114,7 @@ struct WindowUsage {
             costUSD: costUSD,
             percentUsed: sessionPercent,
             cliPercentUsed: cliPercentUsed,
+            hasAPIData: true,
             windowStart: windowStart,
             windowEnd: newWindowEnd,
             secondsUntilReset: newSecondsUntilReset,
@@ -222,7 +224,7 @@ final class UsageCalculator {
         if windowEnd <= now {
             return WindowUsage(
                 creditsUsed: 0, inferenceTokens: 0, cacheTokens: 0, costUSD: 0,
-                percentUsed: 0, cliPercentUsed: 0, windowStart: now,
+                percentUsed: 0, cliPercentUsed: 0, hasAPIData: false, windowStart: now,
                 windowEnd: now.addingTimeInterval(Self.windowDuration),
                 secondsUntilReset: Self.windowDuration, isActive: false,
                 weeklyCredits: weeklyCreditsTotal,
@@ -262,6 +264,7 @@ final class UsageCalculator {
             costUSD: totalCost,
             percentUsed: percent,
             cliPercentUsed: percent,
+            hasAPIData: false,
             windowStart: windowStart,
             windowEnd: windowEnd,
             secondsUntilReset: max(0, windowEnd.timeIntervalSince(now)),
