@@ -30,7 +30,7 @@ struct UsageMetricsView: View {
                             .foregroundStyle(.tertiary)
                     }
                     if let cost {
-                        Text("· \(cost < 0.01 ? "<$0.01" : String(format: "$%.2f", cost)) credit")
+                        Text("· \(cost < 0.01 ? "<$0.01" : String(format: "$%.2f", cost)) used")
                             .font(.system(size: 11))
                             .foregroundStyle(.tertiary)
                     }
