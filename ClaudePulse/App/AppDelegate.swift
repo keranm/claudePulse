@@ -109,9 +109,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.updaterController.checkForUpdates(nil)
         }
         let hostingController = NSHostingController(rootView: PopoverView(engine: engine, checkForUpdates: checkForUpdates))
-        hostingController.view.setFrameSize(NSSize(width: 280, height: 300))
+        hostingController.view.setFrameSize(NSSize(width: 280, height: 360))
         popover.contentViewController = hostingController
-        popover.contentSize = NSSize(width: 280, height: 300)
+        popover.contentSize = NSSize(width: 280, height: 360)
     }
 
     @objc private func togglePopover(_ sender: Any?) {

@@ -21,7 +21,8 @@ struct WindowUsage {
     let inferenceTokens: Int     // raw input+output tokens (informational)
     let cacheTokens: Int         // cache_read + cache_write (free on subscription)
     let costUSD: Double
-    let percentUsed: Double      // creditsUsed / creditCap
+    let percentUsed: Double      // creditsUsed / creditCap (API-authoritative when available)
+    let cliPercentUsed: Double   // JSONL-derived Claude Code % only (pre-API overlay)
     let windowStart: Date
     let windowEnd: Date
     let secondsUntilReset: TimeInterval
@@ -69,7 +70,7 @@ struct WindowUsage {
         let now = Date()
         return WindowUsage(
             creditsUsed: 0, inferenceTokens: 0, cacheTokens: 0, costUSD: 0,
-            percentUsed: 0, windowStart: now,
+            percentUsed: 0, cliPercentUsed: 0, windowStart: now,
             windowEnd: now.addingTimeInterval(5 * 3600),
             secondsUntilReset: 5 * 3600, isActive: false,
             weeklyCredits: 0, weeklyPercentUsed: 0,
@@ -111,6 +112,7 @@ struct WindowUsage {
             cacheTokens: cacheTokens,
             costUSD: costUSD,
             percentUsed: sessionPercent,
+            cliPercentUsed: cliPercentUsed,
             windowStart: windowStart,
             windowEnd: newWindowEnd,
             secondsUntilReset: newSecondsUntilReset,
@@ -220,7 +222,7 @@ final class UsageCalculator {
         if windowEnd <= now {
             return WindowUsage(
                 creditsUsed: 0, inferenceTokens: 0, cacheTokens: 0, costUSD: 0,
-                percentUsed: 0, windowStart: now,
+                percentUsed: 0, cliPercentUsed: 0, windowStart: now,
                 windowEnd: now.addingTimeInterval(Self.windowDuration),
                 secondsUntilReset: Self.windowDuration, isActive: false,
                 weeklyCredits: weeklyCreditsTotal,
@@ -259,6 +261,7 @@ final class UsageCalculator {
             cacheTokens: cacheTokens,
             costUSD: totalCost,
             percentUsed: percent,
+            cliPercentUsed: percent,
             windowStart: windowStart,
             windowEnd: windowEnd,
             secondsUntilReset: max(0, windowEnd.timeIntervalSince(now)),
