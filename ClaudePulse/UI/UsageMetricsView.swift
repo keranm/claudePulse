@@ -8,7 +8,7 @@ struct UsageMetricsView: View {
     }
 
     private var hasBreakdown: Bool {
-        usage.percentUsed - usage.cliPercentUsed > 0.005
+        usage.percentUsed > 0 || usage.cliPercentUsed > 0
     }
 
     private var cliState: UsageState {
@@ -16,7 +16,7 @@ struct UsageMetricsView: View {
     }
 
     @ViewBuilder
-    private func sourceRow(label: String, detail: String, percent: Double, state: UsageState, indent: Bool, cost: Double? = nil) -> some View {
+    private func sourceRow(label: String, detail: String, percent: Double, state: UsageState, indent: Bool, cost: Double? = nil, unavailable: Bool = false) -> some View {
         HStack(spacing: 0) {
             if indent { Spacer().frame(width: 12) }
             VStack(alignment: .leading, spacing: 3) {
@@ -35,21 +35,29 @@ struct UsageMetricsView: View {
                             .foregroundStyle(.tertiary)
                     }
                     Spacer()
-                    Text("\(Int(percent * 100))%")
-                        .font(.system(size: 11, weight: .medium).monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
-                Capsule()
-                    .fill(.secondary.opacity(0.12))
-                    .frame(height: 5)
-                    .overlay(alignment: .leading) {
-                        GeometryReader { geo in
-                            Capsule()
-                                .fill(state.gradient)
-                                .frame(width: geo.size.width * CGFloat(min(percent, 1.0)))
-                                .animation(.easeInOut(duration: 0.5), value: percent)
-                        }
+                    if unavailable {
+                        Text("unavailable")
+                            .font(.system(size: 11))
+                            .foregroundStyle(.tertiary)
+                    } else {
+                        Text("\(Int(percent * 100))%")
+                            .font(.system(size: 11, weight: .medium).monospacedDigit())
+                            .foregroundStyle(.secondary)
                     }
+                }
+                if !unavailable {
+                    Capsule()
+                        .fill(.secondary.opacity(0.12))
+                        .frame(height: 5)
+                        .overlay(alignment: .leading) {
+                            GeometryReader { geo in
+                                Capsule()
+                                    .fill(state.gradient)
+                                    .frame(width: geo.size.width * CGFloat(min(percent, 1.0)))
+                                    .animation(.easeInOut(duration: 0.5), value: percent)
+                            }
+                        }
+                }
             }
         }
     }
@@ -98,7 +106,7 @@ struct UsageMetricsView: View {
                 VStack(spacing: 8) {
                     sourceRow(label: "Total", detail: "all surfaces", percent: usage.percentUsed, state: usage.state, indent: false)
                     sourceRow(label: "Claude Code", detail: "", percent: usage.cliPercentUsed, state: cliState, indent: true, cost: usage.costUSD)
-                    sourceRow(label: "Other devices & web", detail: "~estimated", percent: max(0, usage.percentUsed - usage.cliPercentUsed), state: usage.state, indent: true)
+                    sourceRow(label: "Other devices & web", detail: usage.hasAPIData ? "~estimated" : "", percent: max(0, usage.percentUsed - usage.cliPercentUsed), state: usage.state, indent: true, unavailable: !usage.hasAPIData)
                 }
                 .padding(.top, 4)
             }
