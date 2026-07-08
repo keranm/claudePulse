@@ -45,11 +45,13 @@ struct UsageMetricsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
-                if !unavailable {
-                    Capsule()
-                        .fill(.secondary.opacity(0.12))
-                        .frame(height: 5)
-                        .overlay(alignment: .leading) {
+                // Always render the track for vertical-space consistency;
+                // when data is unavailable we show an empty track (no fill).
+                Capsule()
+                    .fill(.secondary.opacity(0.12))
+                    .frame(height: 5)
+                    .overlay(alignment: .leading) {
+                        if !unavailable {
                             GeometryReader { geo in
                                 Capsule()
                                     .fill(state.gradient)
@@ -57,7 +59,7 @@ struct UsageMetricsView: View {
                                     .animation(.easeInOut(duration: 0.5), value: percent)
                             }
                         }
-                }
+                    }
             }
         }
     }
@@ -101,12 +103,13 @@ struct UsageMetricsView: View {
 
             UsageProgressBar(percent: usage.percentUsed, state: usage.state)
 
-            // ── Source breakdown (shown when API total > JSONL CLI usage) ──
+            // ── Source breakdown ───────────────────────────────────────────
+            // The headline % / bar above is the all-surfaces total; these rows
+            // decompose it into Claude Code vs everything else.
             if hasBreakdown {
                 VStack(spacing: 8) {
-                    sourceRow(label: "Total", detail: "all surfaces", percent: usage.percentUsed, state: usage.state, indent: false)
-                    sourceRow(label: "Claude Code", detail: "", percent: usage.cliPercentUsed, state: cliState, indent: true, cost: usage.costUSD)
-                    sourceRow(label: "Other devices & web", detail: usage.hasAPIData ? "~estimated" : "", percent: max(0, usage.percentUsed - usage.cliPercentUsed), state: usage.state, indent: true, unavailable: !usage.hasAPIData)
+                    sourceRow(label: "Claude Code", detail: "", percent: usage.cliPercentUsed, state: cliState, indent: false, cost: usage.costUSD)
+                    sourceRow(label: "Other devices & web", detail: usage.hasAPIData ? "~estimated" : "", percent: max(0, usage.percentUsed - usage.cliPercentUsed), state: usage.state, indent: false, unavailable: !usage.hasAPIData)
                 }
                 .padding(.top, 4)
             }

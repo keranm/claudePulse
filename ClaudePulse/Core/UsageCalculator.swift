@@ -17,11 +17,13 @@ struct APIUsageData {
 // MARK: -
 
 struct WindowUsage {
-    let creditsUsed: Double      // Anthropic's credit units (weighted by model)
+    let creditsUsed: Double      // Claude Code (local JSONL) credits, input+output only
     let inferenceTokens: Int     // raw input+output tokens (informational)
-    let cacheTokens: Int         // cache_read + cache_write (free on subscription)
+    let cacheCreationTokens: Int // cache write tokens (Claude Code, local JSONL)
+    let cacheReadTokens: Int     // cache read tokens (Claude Code, local JSONL)
+    let creditCap: Double        // session credit cap for the active plan
     let costUSD: Double
-    let percentUsed: Double      // creditsUsed / creditCap (API-authoritative when available)
+    let percentUsed: Double      // API-authoritative all-surfaces % when available
     let cliPercentUsed: Double   // JSONL-derived Claude Code % only (pre-API overlay)
     let hasAPIData: Bool         // true when API overlay was successfully applied
     let windowStart: Date
@@ -57,7 +59,15 @@ struct WindowUsage {
 
     var percentInt: Int { Int(percentUsed * 100) }
 
-    var creditString: String    { Self.formatK(Int(creditsUsed)) }
+    var cacheTokens: Int { cacheCreationTokens + cacheReadTokens }
+
+    // All-surfaces credits: back-solved from the authoritative % when the API
+    // is available (percent × cap), otherwise the local Claude-Code-only figure.
+    var displayCredits: Double {
+        hasAPIData && creditCap > 0 ? percentUsed * creditCap : creditsUsed
+    }
+
+    var creditString: String    { Self.formatK(Int(displayCredits)) }
     var weeklyTokenString: String { Self.formatK(Int(weeklyCredits)) }
     var tokenString: String     { Self.formatK(inferenceTokens) }
 
@@ -70,7 +80,8 @@ struct WindowUsage {
     static var empty: WindowUsage {
         let now = Date()
         return WindowUsage(
-            creditsUsed: 0, inferenceTokens: 0, cacheTokens: 0, costUSD: 0,
+            creditsUsed: 0, inferenceTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0,
+            creditCap: 0, costUSD: 0,
             percentUsed: 0, cliPercentUsed: 0, hasAPIData: false, windowStart: now,
             windowEnd: now.addingTimeInterval(5 * 3600),
             secondsUntilReset: 5 * 3600, isActive: false,
@@ -110,7 +121,9 @@ struct WindowUsage {
         return WindowUsage(
             creditsUsed: creditsUsed,
             inferenceTokens: inferenceTokens,
-            cacheTokens: cacheTokens,
+            cacheCreationTokens: cacheCreationTokens,
+            cacheReadTokens: cacheReadTokens,
+            creditCap: creditCap,
             costUSD: costUSD,
             percentUsed: sessionPercent,
             cliPercentUsed: cliPercentUsed,
@@ -223,7 +236,8 @@ final class UsageCalculator {
 
         if windowEnd <= now {
             return WindowUsage(
-                creditsUsed: 0, inferenceTokens: 0, cacheTokens: 0, costUSD: 0,
+                creditsUsed: 0, inferenceTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0,
+                creditCap: creditCap, costUSD: 0,
                 percentUsed: 0, cliPercentUsed: 0, hasAPIData: false, windowStart: now,
                 windowEnd: now.addingTimeInterval(Self.windowDuration),
                 secondsUntilReset: Self.windowDuration, isActive: false,
@@ -237,7 +251,8 @@ final class UsageCalculator {
         let recentCutoff = now.addingTimeInterval(-Self.activityCutoff)
         var creditsUsed     = 0.0
         var inferenceTokens = 0
-        var cacheTokens     = 0
+        var cacheCreation   = 0
+        var cacheRead       = 0
         var totalCost       = 0.0
         var isActive        = false
 
@@ -250,7 +265,8 @@ final class UsageCalculator {
             let out = usage.outputTokens ?? 0
             creditsUsed     += ceil(Double(inp) * rates.input + Double(out) * rates.output)
             inferenceTokens += inp + out
-            cacheTokens     += (usage.cacheReadInputTokens ?? 0) + (usage.cacheCreationInputTokens ?? 0)
+            cacheCreation   += usage.cache5mWriteTokens + usage.cache1hWriteTokens
+            cacheRead       += usage.cacheReadInputTokens ?? 0
             totalCost       += usage.cost(for: entry.message?.model)
             if !isActive && ts >= recentCutoff { isActive = true }
         }
@@ -260,7 +276,9 @@ final class UsageCalculator {
         return WindowUsage(
             creditsUsed: creditsUsed,
             inferenceTokens: inferenceTokens,
-            cacheTokens: cacheTokens,
+            cacheCreationTokens: cacheCreation,
+            cacheReadTokens: cacheRead,
+            creditCap: creditCap,
             costUSD: totalCost,
             percentUsed: percent,
             cliPercentUsed: percent,
