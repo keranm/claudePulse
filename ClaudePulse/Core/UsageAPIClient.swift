@@ -15,7 +15,11 @@ enum UsageAPIError: Error {
 }
 
 final class UsageAPIClient {
-    private static let keychainService = "Claude Code-credentials"
+    // Ordered Keychain service names to try. Claude Code 2.x stores the OAuth
+    // credential under "Claude Code" (or "claude.ai" for the claudeai-proxy
+    // transport); older versions used "Claude Code-credentials". The account is
+    // the system username, but we match by service only so it isn't hardcoded.
+    private static let keychainServices = ["Claude Code", "claude.ai", "Claude Code-credentials"]
     private static let usageEndpoint   = URL(string: "https://claude.ai/api/oauth/usage")!
     private static let minRefreshInterval: TimeInterval = 60
 
@@ -62,22 +66,24 @@ final class UsageAPIClient {
 
     // MARK: - Private
 
-    // Returns (bearerToken, debugSourceLabel) or nil if item not found in Keychain.
+    // Returns (bearerToken, debugSourceLabel) or nil if no credential is found
+    // under any known service name.
     private func readToken() throws -> (String, String)? {
         guard let data = try readCredentialData() else { return nil }
 
         // Credential is stored as JSON: { "claudeAiOauth": { "accessToken": "...", "rateLimitTier": "...", ... } }
         if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
             // Flat token fields at top level
-            for key in ["claudeAiOauth", "accessToken", "access_token", "token"] {
-                if let tok = json[key] as? String, !tok.isEmpty { return (tok, key) }
+            for key in ["accessToken", "access_token", "token"] {
+                if let tok = json[key] as? String, !tok.isEmpty { return (tok, "\(service):\(key)") }
             }
             // Nested object under claudeAiOauth
             if let nested = json["claudeAiOauth"] as? [String: Any] {
-                // Detect plan before extracting token
-                detectedPlan = Self.detectPlan(from: nested)
+                detectedPlan = Self.detectPlan(from: nested)   // detect plan before extracting token
                 for key in ["accessToken", "access_token", "token"] {
-                    if let tok = nested[key] as? String, !tok.isEmpty { return (tok, "claudeAiOauth.\(key)") }
+                    if let tok = nested[key] as? String, !tok.isEmpty {
+                        return (tok, "\(service):claudeAiOauth.\(key)")
+                    }
                 }
             }
             log.error("Keychain JSON has unexpected shape: \(json.keys.sorted())")
