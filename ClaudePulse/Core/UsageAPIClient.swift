@@ -64,26 +64,7 @@ final class UsageAPIClient {
 
     // Returns (bearerToken, debugSourceLabel) or nil if item not found in Keychain.
     private func readToken() throws -> (String, String)? {
-        let query: [String: Any] = [
-            kSecClass as String:       kSecClassGenericPassword,
-            kSecAttrService as String: Self.keychainService,
-            kSecReturnData as String:  true,
-            kSecMatchLimit as String:  kSecMatchLimitOne
-        ]
-        var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-
-        switch status {
-        case errSecItemNotFound: return nil
-        case errSecSuccess:      break
-        case errSecUserCanceled, errSecInteractionNotAllowed:
-            keychainDeniedUntil = Date().addingTimeInterval(300)
-            log.info("Keychain access denied — backing off 5 minutes")
-            return nil
-        default:                 throw UsageAPIError.keychainError(status)
-        }
-
-        guard let data = result as? Data else { throw UsageAPIError.invalidCredentialFormat }
+        guard let data = try readCredentialData() else { return nil }
 
         // Credential is stored as JSON: { "claudeAiOauth": { "accessToken": "...", "rateLimitTier": "...", ... } }
         if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
@@ -108,6 +89,67 @@ final class UsageAPIClient {
               !token.isEmpty
         else { throw UsageAPIError.invalidCredentialFormat }
         return (token, "plaintext")
+    }
+
+    // Reads the raw credential blob, or nil if the item doesn't exist.
+    //
+    // Claude Code recreates the Keychain item on every token refresh, which resets
+    // the item's ACL — so a per-app "Always Allow" grant to Claude Pulse never
+    // survives, and reading via SecItemCopyMatching prompts for the login password
+    // each time. The `security` tool stays on the recreated item's partition list
+    // (Claude Code writes through it), so shelling out to it reads without a prompt.
+    private func readCredentialData() throws -> Data? {
+        if let data = Self.readViaSecurityCLI() {
+            return data
+        }
+        log.debug("security CLI read failed; falling back to SecItemCopyMatching")
+
+        let query: [String: Any] = [
+            kSecClass as String:       kSecClassGenericPassword,
+            kSecAttrService as String: Self.keychainService,
+            kSecReturnData as String:  true,
+            kSecMatchLimit as String:  kSecMatchLimitOne
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        switch status {
+        case errSecItemNotFound: return nil
+        case errSecSuccess:      break
+        case errSecUserCanceled, errSecInteractionNotAllowed:
+            keychainDeniedUntil = Date().addingTimeInterval(300)
+            log.info("Keychain access denied — backing off 5 minutes")
+            return nil
+        default:                 throw UsageAPIError.keychainError(status)
+        }
+
+        guard let data = result as? Data else { throw UsageAPIError.invalidCredentialFormat }
+        return data
+    }
+
+    private static func readViaSecurityCLI() -> Data? {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/security")
+        process.arguments = ["find-generic-password", "-s", keychainService, "-w"]
+
+        let stdout = Pipe()
+        process.standardOutput = stdout
+        process.standardError  = FileHandle.nullDevice
+
+        do { try process.run() } catch {
+            log.error("Failed to launch security CLI: \(error.localizedDescription)")
+            return nil
+        }
+        let data = stdout.fileHandleForReading.readDataToEndOfFile()
+        process.waitUntilExit()
+
+        guard process.terminationStatus == 0, !data.isEmpty else { return nil }
+
+        // `-w` appends a trailing newline; strip surrounding whitespace.
+        guard let text = String(data: data, encoding: .utf8) else { return nil }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        return Data(trimmed.utf8)
     }
 
     // MARK: - Response parsing
