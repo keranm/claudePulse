@@ -29,3 +29,11 @@ build/
 
 # Archives
 *.xcarchive
+
+# Claude: Ignore local personal code settings
+.claude/settings.local.json
+.claude/CLAUDE.local.md
+
+# Claude: Ignore automated internal session memory
+.claude/memory/
+.claude/agent-memory/
